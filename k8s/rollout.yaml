@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+
+metadata:
+  name: argo-demo
+  namespace: demo
+
+spec:
+  replicas: 2
+
+  selector:
+    matchLabels:
+      app: argo-demo
+
+  template:
+    metadata:
+      labels:
+        app: argo-demo
+
+    spec:
+      containers:
+      - name: argo-demo
+        image: 638111422814.dkr.ecr.us-east-1.amazonaws.com/argo:latest
+        imagePullPolicy: Always
+
+        ports:
+        - containerPort: 3000
+
+  strategy:
+    canary:
+      canaryService: argo-demo-canary
+      stableService: argo-demo-stable
+
+      steps:
+      - setWeight: 20
+      - pause: {}
+
+      - setWeight: 50
+      - pause:
+          duration: 30s
+
+      - setWeight: 100
